@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-backup
+  namespace: student-259281
+spec:
+  schedule: "30 1-23/2 * * 1-5"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: mongo:latest
+            command: ["/bin/sh", "-c"]
+            args:
+              - >
+                mongodump --host mongodb-rw --port 27017 --out /backup/$(date +\%F_\%T) &&
+                echo "Backup completed"
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc

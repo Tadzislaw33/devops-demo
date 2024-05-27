@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: student-259281
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: tadzislaw33/backend:latest
+        env:
+        - name: MONGODB_RW_HOST
+          value: mongodb-rw
+        - name: MONGODB_RO_HOST
+          value: mongodb-ro
+        ports:
+        - containerPort: 5000
+        startupProbe:
+          httpGet:
+            path: /up
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /up
+            port: 5000
+          periodSeconds: 10
